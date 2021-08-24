@@ -15,12 +15,6 @@ public abstract class EventListener<T extends Event> {
         this.event = event;
         client.on(event)
                 .flatMap(this::execute)
-                .onErrorResume(this::handleError)
                 .subscribe();
-    }
-
-    public Mono<Void> handleError(Throwable error) {
-        log.error("Unable to process " + this.event.getSimpleName() + " event.", error);
-        return Mono.empty();
     }
 }

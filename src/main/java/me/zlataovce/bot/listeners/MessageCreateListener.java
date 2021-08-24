@@ -37,7 +37,7 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                 if (part.startsWith("http://") || part.startsWith("https://")) {
                     final String url = part.replace("http://", "").replace("https://", "").split("/")[0];
                     final int distance = LevenshteinDistance.getDefaultInstance().apply("steamcommunity.com", url);
-                    if (distance < 8 && distance > 0) {
+                    if (distance < 6 && distance > 0) {
                         return event.getMessage().delete().onErrorResume(e -> Mono.empty())
                             .then(event.getMessage().getChannel())
                                 .flatMap(channel -> channel.createMessage(messageCreateSpec -> {
@@ -59,7 +59,7 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                                                     .collect(Collectors.joining(" "))
                                                     .block(), null
                                     ));
-                                })).onErrorStop().doOnSuccess(message -> this.scheduler.schedule(() -> message.delete().block(), new Date(System.currentTimeMillis() + 300000))).then();
+                                })).doOnSuccess(message -> this.scheduler.schedule(() -> message.delete().block(), new Date(System.currentTimeMillis() + 300000))).onErrorResume(e -> Mono.empty()).then();
                     }
                 }
             }
