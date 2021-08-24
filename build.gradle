@@ -27,7 +27,7 @@ dependencies {
 	testImplementation 'io.projectreactor:reactor-test:3.4.9'
 	implementation 'com.discord4j:discord4j-core:3.1.7'
 	implementation 'org.checkerframework:checker-qual:3.17.0'
-	implementation 'org.apache.commons:commons-text:1.9'
+	implementation 'info.debatty:java-string-similarity:2.0.0'
 }
 
 test {

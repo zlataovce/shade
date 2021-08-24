@@ -4,8 +4,10 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.rest.util.Color;
+import info.debatty.java.stringsimilarity.Cosine;
+import info.debatty.java.stringsimilarity.JaroWinkler;
+import info.debatty.java.stringsimilarity.Levenshtein;
 import me.zlataovce.bot.services.DiscordClientProviderService;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.TaskScheduler;
@@ -20,6 +22,10 @@ import java.util.stream.Collectors;
 @DependsOn("discordClientProvider")
 public class MessageCreateListener extends EventListener<MessageCreateEvent> {
     private final TaskScheduler scheduler;
+
+    private static final Levenshtein LEVENSHTEIN = new Levenshtein();
+    private static final Cosine COSINE = new Cosine();
+    private static final JaroWinkler JARO_WINKLER = new JaroWinkler();
 
     @Autowired
     public MessageCreateListener(DiscordClientProviderService service, TaskScheduler scheduler) {
@@ -41,8 +47,10 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                         urlParts.remove(0);
                     }
                     final String url = String.join(".", urlParts);
-                    final int distance = LevenshteinDistance.getDefaultInstance().apply("steamcommunity.com", url);
-                    if (distance < 6 && distance > 0) {
+                    final int distance = (int) LEVENSHTEIN.distance("steamcommunity.com", url);
+                    final double cosineSimilarity = COSINE.similarity("steamcommunity.com", url);
+                    final double jwSimilarity = JARO_WINKLER.similarity("steamcommunity.com", url);
+                    if ((distance <= 6 && distance > 0) && (cosineSimilarity < 1 && cosineSimilarity >= 0.75) && (jwSimilarity < 1 && jwSimilarity >= 0.8)) {
                         return event.getMessage().delete().onErrorResume(e -> Mono.empty())
                             .then(event.getMessage().getChannel())
                                 .flatMap(channel -> channel.createMessage(messageCreateSpec -> {
