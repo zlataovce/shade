@@ -38,7 +38,7 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                     final String url = part.replace("http://", "").replace("https://", "").split("/")[0];
                     final int distance = LevenshteinDistance.getDefaultInstance().apply("steamcommunity.com", url);
                     if (distance < 8 && distance > 0) {
-                        return event.getMessage().delete()
+                        return event.getMessage().delete().onErrorResume(e -> Mono.empty())
                             .then(event.getMessage().getChannel())
                                 .flatMap(channel -> channel.createMessage(messageCreateSpec -> {
                                     messageCreateSpec.addEmbed(embedCreateSpec -> {
@@ -54,12 +54,12 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                                     messageCreateSpec.setContent(Objects.requireNonNullElse(
                                             event.getGuild()
                                                     .flatMapMany(Guild::getRoles)
-                                                    .filter(role -> role.getName().toLowerCase(Locale.ROOT).contains("shade"))
+                                                    .filter(role -> role.getName().toLowerCase(Locale.ROOT).contains("shade notifications"))
                                                     .map(Role::getMention)
                                                     .collect(Collectors.joining(" "))
                                                     .block(), null
                                     ));
-                                })).doOnSuccess(message -> this.scheduler.schedule(() -> message.delete().block(), new Date(System.currentTimeMillis() + 300000))).then();
+                                })).onErrorStop().doOnSuccess(message -> this.scheduler.schedule(() -> message.delete().block(), new Date(System.currentTimeMillis() + 300000))).then();
                     }
                 }
             }
