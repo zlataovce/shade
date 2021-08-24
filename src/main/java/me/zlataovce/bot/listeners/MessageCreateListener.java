@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +33,14 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
             final String[] parts = event.getMessage().getContent().split(" ");
             for (String part : parts) {
                 if (part.startsWith("http://") || part.startsWith("https://")) {
-                    final String url = part.replace("http://", "").replace("https://", "").split("/")[0];
+                    final List<String> urlParts = Arrays.stream(part.replace("http://", "")
+                            .replace("https://", "")
+                            .split("/")[0]
+                            .split("\\.")).collect(Collectors.toList());
+                    if (Objects.equals(urlParts.get(0), "www")) {
+                        urlParts.remove(0);
+                    }
+                    final String url = String.join(".", urlParts);
                     final int distance = LevenshteinDistance.getDefaultInstance().apply("steamcommunity.com", url);
                     if (distance < 6 && distance > 0) {
                         return event.getMessage().delete().onErrorResume(e -> Mono.empty())
