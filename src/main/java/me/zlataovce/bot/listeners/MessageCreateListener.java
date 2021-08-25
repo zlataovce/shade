@@ -50,7 +50,7 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                     final int distance = (int) LEVENSHTEIN.distance("steamcommunity.com", url);
                     final double cosineSimilarity = COSINE.similarity("steamcommunity.com", url);
                     final double jwSimilarity = JARO_WINKLER.similarity("steamcommunity.com", url);
-                    if ((distance <= 6 && distance > 0) && (cosineSimilarity < 1 && cosineSimilarity >= 0.75) && (jwSimilarity < 1 && jwSimilarity >= 0.8)) {
+                    if ((distance <= 6 && distance > 0) && (cosineSimilarity < 1 && cosineSimilarity >= 0.75) && (jwSimilarity < 1 && jwSimilarity >= 0.75)) {
                         return event.getMessage().delete().onErrorResume(e -> Mono.empty())
                             .then(event.getMessage().getChannel())
                                 .flatMap(channel -> channel.createMessage(messageCreateSpec -> {
