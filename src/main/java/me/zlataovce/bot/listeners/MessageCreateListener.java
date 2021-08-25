@@ -64,14 +64,14 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                                             embedCreateSpec.setThumbnail(event.getMember().get().getAvatarUrl());
                                         }
                                     });
-                                    messageCreateSpec.setContent(Objects.requireNonNullElse(
-                                            event.getGuild()
+                                    messageCreateSpec.setContent(
+                                            Optional.ofNullable(event.getGuild()
                                                     .flatMapMany(Guild::getRoles)
                                                     .filter(role -> role.getName().toLowerCase(Locale.ROOT).contains("shade notifications"))
                                                     .map(Role::getMention)
                                                     .collect(Collectors.joining(" "))
-                                                    .block(), null
-                                    ));
+                                                    .block()).orElse("")
+                                    );
                                 })).doOnSuccess(message -> this.scheduler.schedule(() -> message.delete().block(), new Date(System.currentTimeMillis() + 300000))).onErrorResume(e -> Mono.empty()).then();
                     }
                 }
