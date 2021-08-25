@@ -25,7 +25,6 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
 
     private static final Levenshtein LEVENSHTEIN = new Levenshtein();
     private static final Cosine COSINE = new Cosine();
-    private static final JaroWinkler JARO_WINKLER = new JaroWinkler();
 
     @Autowired
     public MessageCreateListener(DiscordClientProviderService service, TaskScheduler scheduler) {
@@ -49,8 +48,7 @@ public class MessageCreateListener extends EventListener<MessageCreateEvent> {
                     final String url = String.join(".", urlParts);
                     final int distance = (int) LEVENSHTEIN.distance("steamcommunity.com", url);
                     final double cosineSimilarity = COSINE.similarity("steamcommunity.com", url);
-                    final double jwSimilarity = JARO_WINKLER.similarity("steamcommunity.com", url);
-                    if ((distance <= 6 && distance > 0) && (cosineSimilarity < 1 && cosineSimilarity >= 0.75) && (jwSimilarity < 1 && jwSimilarity >= 0.75)) {
+                    if ((distance <= 6 && distance > 0) && (cosineSimilarity < 1 && cosineSimilarity >= 0.75)) {
                         return event.getMessage().delete().onErrorResume(e -> Mono.empty())
                             .then(event.getMessage().getChannel())
                                 .flatMap(channel -> channel.createMessage(messageCreateSpec -> {
