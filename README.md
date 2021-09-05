@@ -3,7 +3,7 @@ A bot designed to catch the so-called "steam scams" in it's roots
 
 ## Installation (needs Java 11+)
  - Compile the executable JAR with `gradlew bootJar` and take it from `build/libs`.
- - or get it from my CI: [https://ci.kcra.me/project/Shade](https://ci.kcra.me/project/Shade)
+ - or get it from releases
 
 ## Running the bot
  - You can run the JAR with a simple command: `java -jar <file>.jar --bot.token=yourbottokenhere`
